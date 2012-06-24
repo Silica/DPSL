@@ -5,6 +5,7 @@ import variable;
 import tokenizer;
 import parser;
 
+import code;
 import environment;
 
 variable Print(variable v)
@@ -25,7 +26,9 @@ void main(string[] args)
 	scope p = new Parser(t);
 
 	scope e = new Environment;
+	scope c = new Code;
 	e.getVariable("print").substitution(new variable(&Print));
-	p.Parse(e);
+	p.Parse(c);
+	e.setcode(c);
 	e.Run();
 }

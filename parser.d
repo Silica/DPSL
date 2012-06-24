@@ -13,12 +13,13 @@ class Parser
 	{
 		t = to;
 	}
-	void Parse(Environment v)
+	void Parse(Code v)
 	{
+		v.pushcode(new VARIABLE("arg"));
 		while (t.checkNext())
 			ParseStatement(v);
 	}
-	void ParseStatement(Environment v)
+	void ParseStatement(Code v)
 	{
 		int n = t.checkNext();
 		if (n == ';')
@@ -26,15 +27,16 @@ class Parser
 			t.getNext();
 			return;
 		}
+		v.pushcode(new POP);
 		ParseExpression(v, ';');
 	}
-	void ParseExpression(Environment c, char e, bool l = false)
+	void ParseExpression(Code c, char e, bool l = false)
 	{
 		getexp13(c, l);
 		if (!t.getNextIf(e))
 			writefln("error ;");
 	}
-	void getexp13(Environment c, bool l = false)
+	void getexp13(Code c, bool l = false)
 	{
 		getexp2(c, l);
 		while (t.checkNext())
@@ -49,7 +51,7 @@ class Parser
 			else break;
 		}
 	}
-	void getexp2(Environment c, bool l = false)
+	void getexp2(Code c, bool l = false)
 	{
 		getexp1(c, l);
 		while (t.checkNext())
@@ -70,7 +72,7 @@ class Parser
 			else break;
 		}
 	}
-	void getexp1(Environment c, bool l = false)
+	void getexp1(Code c, bool l = false)
 	{
 		getTerm(c);
 		while (t.checkNext())
@@ -97,7 +99,7 @@ class Parser
 			else break;
 		}
 	}
-	void getTerm(Environment c)
+	void getTerm(Code c)
 	{
 		int n = t.checkNext();
 		if (n == '('/*')'*/)
@@ -134,7 +136,7 @@ class Parser
 			t.getNext();
 		}
 	}
-	void getSuffOp(Environment c)
+	void getSuffOp(Code c)
 	{
 		while (t.checkNext())
 		{

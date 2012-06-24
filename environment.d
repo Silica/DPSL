@@ -6,26 +6,32 @@ class Environment
 	variable[16] stack;
 	int ns = 0;
 	variable global;
-//	Scope sc;
+	Scope sc = null;
 
-	this(){global = new variable;
-		code = new Code;
-	}
+	this(){global = new variable;}
 	variable getVariable(string s){return global[s];}
 	void push(variable v){stack[ns++] = v;}
 	variable pop(){return stack[--ns];}
 	variable Run()
 	{
-//		sc.Run(this);
-		code.Run(this, line);
+		while (sc && sc.Run(this)){}
 		return pop();
 	}
-
-	int line = 0;
-	Code code;
-	void pushcode(OpCode o)
+	void addScope(Scope s)
 	{
-		code.push(o);
+		if (sc)
+			s.next = sc;
+		sc = s;
+	}
+	void endScope()
+	{
+		sc = sc.next;
+	}
+
+	void setcode(Code c)
+	{
+		global.setcode(c);
+		addScope(new Scope(c));
 	}
 
 }
@@ -33,9 +39,11 @@ class Environment
 class Scope
 {
 	Code code;
+	Scope next = null;
 	int line = 0;
-	void Run(Environment e)
+	this(Code c){code = c;}
+	bool Run(Environment e)
 	{
-		code.Run(e, line);
+		return code.Run(e, line);
 	}
 }

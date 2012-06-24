@@ -12,14 +12,16 @@ class Code
 	{
 		code = new OpCode[0];
 	}
-	void Run(Environment e, ref int line)
+	bool Run(Environment e, ref int line)
 	{
 		while (line < code.length)
 		{
 			code[line++].Exec(e);
 		}
+		e.endScope();
+		return true;
 	}
-	void push(OpCode o)
+	void pushcode(OpCode o)
 	{
 		code[code.length++] = o;
 	}
