@@ -3,6 +3,8 @@ import environment;
 enum RC
 {
 	NONE = 0,
+	CALL,
+	FOR,
 }
 
 class Code
@@ -16,7 +18,10 @@ class Code
 	{
 		while (line < code.length)
 		{
-			code[line++].Exec(e);
+			auto r = code[line++].Exec(e);
+			if (!r)
+				continue;
+			return true;
 		}
 		e.endScope();
 		return true;
@@ -25,11 +30,20 @@ class Code
 	{
 		code[code.length++] = o;
 	}
+	void pushcodes(Code c)
+	{
+		code ~= c.code;
+	}
+	int getLength()
+	{
+		return code.length;
+	}
 }
 
 class OpCode
 {
 	RC Exec(Environment e){return RC.NONE;}
+	void set(int i){}
 }
 class PUSH_INT : OpCode
 {
@@ -209,7 +223,7 @@ class EQ : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l == r));
+		e.push(new variable(l.eq(r)));
 		return RC.NONE;
 	}
 }
@@ -219,7 +233,7 @@ class NE : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l != r));
+		e.push(new variable(l.ne(r)));
 		return RC.NONE;
 	}
 }
@@ -229,7 +243,7 @@ class LE : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l <= r));
+		e.push(new variable(l.le(r)));
 		return RC.NONE;
 	}
 }
@@ -239,7 +253,7 @@ class GE : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l >= r));
+		e.push(new variable(l.ge(r)));
 		return RC.NONE;
 	}
 }
@@ -249,7 +263,7 @@ class LT : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l < r));
+		e.push(new variable(l.lt(r)));
 		return RC.NONE;
 	}
 }
@@ -259,7 +273,7 @@ class GT : OpCode
 	{
 		variable r = e.pop();
 		variable l = e.pop();
-		e.push(new variable(l > r));
+		e.push(new variable(l.gt(r)));
 		return RC.NONE;
 	}
 }
@@ -270,6 +284,65 @@ class MINUS : OpCode
 		variable v = e.pop();
 		e.push(new variable(-v.toInt()));
 		return RC.NONE;
+	}
+}
+class JMP : OpCode
+{
+	int j;
+	this(int i){j = i;}
+	void set(int i){j = i;}
+	RC Exec(Environment e)
+	{
+		e.Jump(j);
+		return RC.NONE;
+	}
+}
+class JF : OpCode
+{
+	int j;
+	this(int i){j = i;}
+	void set(int i){j = i;}
+	RC Exec(Environment e)
+	{
+		variable v = e.pop();
+		if (!v.toBool())
+			e.Jump(j);
+		return RC.NONE;
+	}
+}
+class JR : OpCode
+{
+	int j;
+	this(int i){j = i;}
+	void set(int i){j = i;}
+	RC Exec(Environment e)
+	{
+		e.RJump(j);
+		return RC.NONE;
+	}
+}
+class JRF : OpCode
+{
+	int j;
+	this(int i){j = i;}
+	void set(int i){j = i;}
+	RC Exec(Environment e)
+	{
+		variable v = e.pop();
+		if (!v.toBool())
+			e.RJump(j);
+		return RC.NONE;
+	}
+}
+class LOOP : OpCode
+{
+	int cline;
+	Code code;
+	this(Code c, int i){code = c;cline = i;}
+	RC Exec(Environment e)
+	{
+		e.addScope(new Scope(code));
+		return RC.FOR;
 	}
 }
 class CALL : OpCode

@@ -57,6 +57,8 @@ class variable
 		string toString(){return x;}
 		vBase substitution(variable v){x = v.toString();return this;}
 		void add(variable v){x ~= v.toString();}
+		bool eq(variable v){return x == v.toString();}
+		bool ne(variable v){return x != v.toString();}
 		string x;
 	}
 	class vObject : vBase
@@ -91,6 +93,7 @@ class variable
 	this(cfunction f)	{x = new vFunction(f);}
 	this(vBase v){x = v;}
 	variable clone(){return new variable(x.clone());}
+	bool toBool(){return x.toBool();}
 	int toInt(){return x.toInt();}
 	string toString(){return x.toString();}
 	variable opIndex(string s){return x.child(s);}

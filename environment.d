@@ -27,6 +27,8 @@ class Environment
 	{
 		sc = sc.next;
 	}
+	void Jump(int i){sc.line = i;}
+	void RJump(int i){sc.line += i;}
 
 	void setcode(Code c)
 	{
